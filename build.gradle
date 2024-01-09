@@ -15,6 +15,7 @@ import com.facebook.fresco.buildsrc.GradleDeps
 buildscript {
 
     repositories {
+        mavenLocal()
         google()
         jcenter()
         mavenCentral()
@@ -32,6 +33,7 @@ buildscript {
 
 plugins {
     id "de.undercouch.download" version "3.1.2"
+    id 'signing'
 }
 
 project.ext {
@@ -235,4 +237,25 @@ subprojects {
             "libwebp-${LIBWEBP_VERSION}" // Final destination dir
     )
 
+    apply plugin: 'maven-publish'
+
+    group = 'com.github'
+    version = '2.5.1'
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+            }
+        }
+
+        repositories {
+            mavenLocal() // Publish to the local Maven repository
+        }
+    }
+
+    tasks.withType(Sign) {
+        onlyIf {
+            project.hasProperty('signing.keyId')
+        }
+    }
 }
