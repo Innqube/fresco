@@ -67,7 +67,7 @@ project.ext {
     preDexLibs = !project.hasProperty('disablePreDex')
 }
 
-group = 'com.innqube'
+group = 'com.facebook.fresco'
 version = '2.5.1'
 
 allprojects {
