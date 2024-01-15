@@ -17,8 +17,14 @@ buildscript {
     repositories {
         mavenLocal()
         google()
-        jcenter()
-        mavenCentral()
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/innqube/fresco")
+            credentials {
+                username = project.findProperty("mavenCentralUsername") ?: System.getenv("USERNAME_GITHUB")
+                password = project.findProperty("mavenCentralPassword") ?: System.getenv("TOKEN_GITHUB")
+            }
+        }
     }
     dependencies {
         classpath GradleDeps.Android.gradlePlugin
@@ -33,11 +39,49 @@ buildscript {
 
 plugins {
     id "de.undercouch.download" version "3.1.2"
-    id 'signing'
+    id 'maven-publish'
+    id 'java'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/innqube/fresco")
+            credentials {
+                username = project.findProperty("mavenCentralUsername") ?: System.getenv("USERNAME_GITHUB")
+                password = project.findProperty("mavenCentralPassword") ?: System.getenv("TOKEN_GITHUB")
+            }
+        }
+        mavenLocal() // Publish to the local Maven repository
+    }
 }
 
 project.ext {
     preDexLibs = !project.hasProperty('disablePreDex')
+}
+
+group = 'com.innqube'
+version = '2.5.1'
+
+allprojects {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/innqube/fresco")
+            credentials {
+                username = project.findProperty("mavenCentralUsername") ?: System.getenv("USERNAME_GITHUB")
+                password = project.findProperty("mavenCentralPassword") ?: System.getenv("TOKEN_GITHUB")
+            }
+        }
+        mavenLocal() // Publish to the local Maven repository
+    }
 }
 
 subprojects {
@@ -45,6 +89,15 @@ subprojects {
     repositories {
         google()
         jcenter()
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/innqube/fresco")
+            credentials {
+                username = project.findProperty("mavenCentralUsername") ?: System.getenv("USERNAME_GITHUB")
+                password = project.findProperty("mavenCentralPassword") ?: System.getenv("TOKEN_GITHUB")
+            }
+        }
+        mavenLocal() // Publish to the local Maven repository
     }
 
     // FIXME: This picks up non-Java files by default, failing to parse them.
@@ -237,25 +290,14 @@ subprojects {
             "libwebp-${LIBWEBP_VERSION}" // Final destination dir
     )
 
-    apply plugin: 'maven-publish'
-
-    group = 'com.github'
-    version = '2.5.1'
-
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-            }
-        }
-
-        repositories {
-            mavenLocal() // Publish to the local Maven repository
-        }
-    }
-
     tasks.withType(Sign) {
         onlyIf {
             project.hasProperty('signing.keyId')
         }
     }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
